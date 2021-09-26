@@ -11,6 +11,8 @@ logging.basicConfig(
 
 class Settings(BaseSettings):
     telegram_bot_token: str
+    user_id: str
+    from_chat_ids: list
 
     class Config:
         env_file = ".env"
