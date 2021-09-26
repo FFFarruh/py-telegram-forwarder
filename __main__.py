@@ -1,28 +1,24 @@
-from telegram.ext import Filters, MessageHandler, Updater
-from telegram.ext.callbackcontext import CallbackContext
-from telegram.update import Update
+from pyrogram import Client
+from pyrogram.types.messages_and_media.message import Message
 from settings import Settings
 import logging
 
+setting = Settings()
+client = Client("", setting.api_id, setting.api_hash)
 
-def echo_message(update: Update, _context: CallbackContext) -> None:
-    settings = Settings()
-    chat_id = update.effective_message.chat_id
 
-    if update.effective_message.chat_id == settings.user_id:
+@client.on_message()
+async def echo_message(client: Client, message: Message) -> None:
+    global setting
+    if message.chat.id == setting.target_id:
         logging.info("Message echo ignored: Message from target chat")
         return
-    elif chat_id not in settings.from_chat_ids:
+    elif message.chat.id not in setting.from_chat_ids:
         logging.info("Message echo ignored: This chat missing in white-list")
         return
-
-    message_id = update.effective_message.message_id
-    update.message.bot.forward_message(settings.user_id, chat_id, message_id)
-
-
-updater = Updater(Settings().telegram_bot_token)
-updater.dispatcher.add_handler(MessageHandler(Filters.text, echo_message))
+    await client.forward_messages(
+        setting.target_id, message.chat.id, message.message_id
+    )
 
 
-updater.start_polling()
-updater.idle()
+client.run()

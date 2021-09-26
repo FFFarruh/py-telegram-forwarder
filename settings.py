@@ -10,8 +10,9 @@ logging.basicConfig(
 
 
 class Settings(BaseSettings):
-    telegram_bot_token: str
-    user_id: str
+    api_id: int
+    api_hash: str
+    target_id: int
     from_chat_ids: list
 
     class Config:
