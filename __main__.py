@@ -13,16 +13,8 @@ async def help_command():
     )
 
 
-@client.on_message()
 async def echo_message(client: Client, message: Message) -> None:
-    global setting
-
-    if message.text == "/help" and message.chat.id == setting.target_id:
-        logging.info("Run command help: Message from target chat")
-        await help_command()
-        return
-
-    elif message.chat.id == setting.target_id:
+    if message.chat.id == setting.target_id:
         logging.info("Message echo ignored: Message from target chat")
         return
 
@@ -33,6 +25,18 @@ async def echo_message(client: Client, message: Message) -> None:
     await client.forward_messages(
         setting.target_id, message.chat.id, message.message_id
     )
+
+
+@client.on_message()
+async def handle_message(client: Client, message: Message) -> None:
+    global setting
+
+    if message.text == "/help" and message.chat.id == setting.target_id:
+        logging.info("Run command help: Message from target chat")
+        await help_command()
+        return
+
+    await echo_message(client, message)
 
 
 client.run()
