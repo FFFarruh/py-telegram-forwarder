@@ -54,11 +54,23 @@ async def add_or_remove(client: Client, message: Message) -> str:
     if not await is_chat(client, message.text):
         return "No such chat-group were found"
 
-    if await is_subscribed(user_id, chat_id):
+    elif await is_subscribed(user_id, chat_id):
         return await unsubscribe_from_chat(user_id, chat_id, message.text)
 
     else:
         return await subscribe_to_chat(user_id, chat_id, message.text)
+
+
+async def display_subscriptions(client: Client, user_id):
+    """Displaying a list of subscriptions to the user"""
+    subscribtions_list = "📝A list of your subscriptions:📝\n\n"
+    subscribtions_dict = await get_subscribtions(user_id)
+    if subscribtions_dict == {}:
+        subscribtions_list += "Empty"
+    else:
+        for id_ in subscribtions_dict:
+            subscribtions_list += f"🟢{subscribtions_dict[id_]}\n"
+    await client.send_message(user_id, subscribtions_list)
 
 
 async def is_subscribed(user_id: int, chat_id: int) -> bool:
@@ -134,6 +146,7 @@ async def handle_message(client: Client, message: Message) -> None:
         logging.info("Run command add/remove: Message from target chat")
         response = await add_or_remove(client, message)
         await client.send_message(setting.target_id, response)
+        await display_subscriptions(client, message.from_user.id)
         return
 
     await echo_message(client, message)
