@@ -30,7 +30,10 @@ async def help_command() -> None:
 
 async def echo_message(client: Client, message: Message) -> None:
     """Forward a message from other chats to a personal chat with the user"""
-    from_user_id = user_subscribtions[message.from_user.id]
+    if message.from_user.id in user_subscribtions:
+        from_user_id = user_subscribtions[message.from_user.id]
+    else:
+        return
     if message.chat.id == setting.target_id:
         logging.info("Message echo ignored: Message from target chat")
         return
@@ -70,7 +73,9 @@ async def get_user_id(message: Message) -> int:
 
 
 async def get_subscribtions(user_id) -> dict:
+    """Getting the dictionary with user subscriptions"""
     global user_subscribtions
+    await is_user(user_id)
     return user_subscribtions[user_id]
 
 
@@ -87,7 +92,7 @@ async def subscribe_to_chat(
 ) -> str:
     """Subscribe to chat to update"""
     user_subscribtions_list = user_subscribtions[user_id]
-    user_subscribtions_list[chat_id] = chat_id
+    user_subscribtions_list[chat_id] = message_text
     return f"Add {message_text}"
 
 
@@ -120,7 +125,6 @@ async def is_chat(client: Client, message_text: str) -> bool:
 @client.on_message()
 async def handle_message(client: Client, message: Message) -> None:
     global setting
-    await is_user(message.from_user.id)
     if message.text == "/help" and message.chat.id == setting.target_id:
         logging.info("Run command help: Message from target chat")
         await help_command()
