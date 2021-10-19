@@ -61,9 +61,11 @@ async def add_or_remove(client: Client, message: Message) -> str:
         return await subscribe_to_chat(user_id, chat_id, message.text)
 
 
-async def display_subscriptions(client: Client, user_id):
+async def display_subscriptions(
+    client: Client, user_id: int, response: str
+) -> None:
     """Displaying a list of subscriptions to the user"""
-    subscribtions_list = "📝A list of your subscriptions:📝\n\n"
+    subscribtions_list = response + "\n\n📝A list of your subscriptions:📝\n\n"
     subscribtions_dict = await get_subscribtions(user_id)
     if subscribtions_dict == {}:
         subscribtions_list += "Empty"
@@ -84,7 +86,7 @@ async def get_user_id(message: Message) -> int:
     return message.from_user.id
 
 
-async def get_subscribtions(user_id) -> dict:
+async def get_subscribtions(user_id: int) -> dict:
     """Getting the dictionary with user subscriptions"""
     global user_subscribtions
     await is_user(user_id)
@@ -105,7 +107,7 @@ async def subscribe_to_chat(
     """Subscribe to chat to update"""
     user_subscribtions_list = user_subscribtions[user_id]
     user_subscribtions_list[chat_id] = message_text
-    return f"Add {message_text}"
+    return f"You've been subscribed to {message_text}"
 
 
 async def unsubscribe_from_chat(
@@ -114,7 +116,7 @@ async def unsubscribe_from_chat(
     """Unsubscribe from chat with updates"""
     user_subscribtions_list = user_subscribtions[user_id]
     del user_subscribtions_list[chat_id]
-    return f"Remove {message_text}"
+    return f"You are unsubscribed from {message_text}"
 
 
 async def get_chat_id(client: Client, message_text: str) -> int:
@@ -145,8 +147,7 @@ async def handle_message(client: Client, message: Message) -> None:
     elif message.chat.id == setting.target_id:
         logging.info("Run command add/remove: Message from target chat")
         response = await add_or_remove(client, message)
-        await client.send_message(setting.target_id, response)
-        await display_subscriptions(client, message.from_user.id)
+        await display_subscriptions(client, message.from_user.id, response)
         return
 
     await echo_message(client, message)
