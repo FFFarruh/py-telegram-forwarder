@@ -1,10 +1,10 @@
 from pyrogram import Client
 from pyrogram.methods.messages import Messages
+
 from app.entrypoints import handle_message
-from settings import Settings
+from app.settings import Settings
 
 setting = Settings()
-
 client = Client("", setting.api_id, setting.api_hash)
 
 

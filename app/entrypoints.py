@@ -1,35 +1,32 @@
 import logging
+
 from pyrogram import Client
-from pyrogram.methods.messages import Messages
-from app.settings import Settings
-from app.services import (
+from pyrogram.types.messages_and_media.message import Message
+from services import (
     add_or_remove,
-    create_db,
     display_subscriptions,
     echo_message,
     help_command,
 )
+from settings import Settings
 
 setting = Settings()
 
 
-# @client.on_message()
-async def handle_message(client: Client, message: Messages) -> None:
-    global setting
-    if message.text == "/help" and message.chat.id == setting.target_id:
-        logging.info("Run command help: Message from target chat")
-        await help_command(client)
-        return
+async def handle_message(client: Client, message: Message) -> None:
+    list_dialogs = await client.get_dialogs()
+    if message.chat.id == setting.target_id:
+        if message.text == "/help":
+            logging.info("Run command help: Message from target chat")
+            await help_command(client)
+            return
 
-    elif message.text == "/create db" and message.chat.id == setting.target_id:
-        logging.info("Run command create db: Message from target chat")
-        await create_db(setting.db_url)
-        return
+        else:
+            logging.info("Run command add/remove: Message from target chat")
+            response = await add_or_remove(message, list_dialogs)
+            await display_subscriptions(
+                client, message.from_user.id, response, list_dialogs
+            )
+            return
 
-    elif message.chat.id == setting.target_id:
-        logging.info("Run command add/remove: Message from target chat")
-        response = await add_or_remove(client, message)
-        await display_subscriptions(client, message.from_user.id, response)
-        return
-
-    await echo_message(client, message)
+    await echo_message(client, message, list_dialogs)
