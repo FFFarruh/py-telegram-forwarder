@@ -20,7 +20,7 @@ async def help_command(client: Client) -> None:
 async def echo_message(client: Client, message: Message, list_dialogs) -> None:
     """Forward a message from other chats to a personal chat with the user"""
     user_subscribtions = await get_subscribtions_db(
-        list_dialogs, message.from_user.id
+        setting.db_url, list_dialogs, message.from_user.id
     )
 
     if message.from_user.id in user_subscribtions:
@@ -91,7 +91,9 @@ def get_user_id(message: Message) -> int:
 async def get_subscribtions(user_id: int, list_dialogs) -> dict:
     """Getting the dictionary with user subscriptions"""
     await is_user(user_id, list_dialogs)
-    user_subscribtions = await get_subscribtions_db(list_dialogs, user_id)
+    user_subscribtions = await get_subscribtions_db(
+        setting.db_url, list_dialogs, user_id
+    )
     return user_subscribtions[user_id]
 
 
@@ -110,10 +112,12 @@ async def subscribe_to_chat(
     user_id: int, chat_id: int, message_text: str, list_dialogs
 ) -> str:
     """Subscribe to chat to update"""
-    user_subscribtions = await get_subscribtions_db(list_dialogs, user_id)
+    user_subscribtions = await get_subscribtions_db(
+        setting.db_url, list_dialogs, user_id
+    )
     user_subscribtions_list = user_subscribtions[user_id]
     user_subscribtions_list[chat_id] = message_text
-    await insert_db((str(user_id), str(chat_id)))
+    await insert_db(setting.db_url, (str(user_id), str(chat_id)))
 
     return f"You've been subscribed to {message_text}"
 
@@ -122,7 +126,7 @@ async def unsubscribe_from_chat(
     user_id: int, chat_id: int, message_text: str
 ) -> str:
     """Unsubscribe from chat with updates"""
-    await delete_subscribtions((str(user_id), str(chat_id)))
+    await delete_subscribtions(setting.db_url, (str(user_id), str(chat_id)))
 
     return f"You are unsubscribed from {message_text}"
 
@@ -144,7 +148,9 @@ async def is_chat(message_text: str, list_dialogs) -> bool:
 
 async def is_user(user_id: int, list_dialogs) -> None:
     """Check if such a user exists, if not, create"""
-    user_subscribtions = await get_subscribtions_db(list_dialogs, user_id)
+    user_subscribtions = await get_subscribtions_db(
+        setting.db_url, list_dialogs, user_id
+    )
     if user_id in user_subscribtions:
         return
     else:

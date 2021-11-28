@@ -1,12 +1,9 @@
 import psycopg
-from settings import Settings
-
-setting = Settings()
 
 
-async def create_db():
+async def create_db(url):
     """Creating a table in a database"""
-    with psycopg.connect(setting.db_url) as conn:
+    with psycopg.connect(url) as conn:
 
         with conn.cursor() as cur:
 
@@ -21,9 +18,9 @@ async def create_db():
             conn.commit()
 
 
-async def insert_db(values: tuple):
+async def insert_db(url, values: tuple):
     """Adding a record to a table"""
-    with psycopg.connect(setting.db_url) as conn:
+    with psycopg.connect(url) as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """INSERT INTO db_subscribtions (
@@ -36,9 +33,9 @@ async def insert_db(values: tuple):
         conn.commit()
 
 
-async def delete_subscribtions(values: tuple):
+async def delete_subscribtions(url, values: tuple):
     """Removing entries from a table"""
-    with psycopg.connect(setting.db_url) as conn:
+    with psycopg.connect(url) as conn:
         with conn.cursor() as cur:
 
             cur.execute(
@@ -59,9 +56,9 @@ async def delete_subscribtions(values: tuple):
             conn.commit()
 
 
-async def get_subscribtions_db(list_dialogs, user_id: int):
+async def get_subscribtions_db(url, list_dialogs, user_id: int):
     """Geting a subscribtions from a table for a specific user"""
-    with psycopg.connect(setting.db_url) as conn:
+    with psycopg.connect(url) as conn:
 
         with conn.cursor() as cur:
             cur.execute(
@@ -103,5 +100,5 @@ async def get_user_subscribtions(
 async def get_chat_name(list_dialogs, chat_id: str):
     """Getting the current chat name"""
     for dialog in list_dialogs:
-        if dialog is None and str(dialog.chat.id) == chat_id:
+        if str(dialog.chat.id) == chat_id:
             return dialog.chat.title

@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     target_id: int
     from_chat_ids: list
     db_url: str
+    db_test_url: str
 
     class Config:
         env_file = ".env"
