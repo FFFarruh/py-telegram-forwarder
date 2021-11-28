@@ -1,3 +1,4 @@
 .env
 **/__pycache__
 .session
+.pytest_cache
